@@ -24,7 +24,8 @@
                 <pre v-if="server_seed && server_hash">Server seed matches provided hash: <span v-bind:result="seed_hash_match() || 'false'">{{seed_hash_match()}}</span></pre>
                 <pre v-if="client_seed && server_seed && nonce">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${round||0}`}}</pre>
                 <pre v-if="client_seed && server_seed && nonce">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${round||0}`)}`}}</pre>
-                <div v-if="active_game === 'Dice' && client_seed && server_seed && nonce">
+                
+                <div v-if="(active_game === 'Dice' || active_game === 'Roulette') && client_seed && server_seed && nonce">
                     <h4>First four bytes</h4>
                     <table>
                         <tr>
@@ -39,9 +40,10 @@
                     <h4>Bytes to Number</h4>
                     <pre v-for="i in 4">{{`${parseInt(bytes(i-1),16)} / 256 ^ ${i} = ${parseInt(bytes(i-1),16)/Math.pow(256,i)}`}}</pre>
                     <pre>{{`${parseInt(bytes(0),16)/Math.pow(256,1)} + ${parseInt(bytes(1),16)/Math.pow(256,2)} + ${parseInt(bytes(2),16)/Math.pow(256,3)} + ${parseInt(bytes(3),16)/Math.pow(256,4)}`}}</pre>
-                    <pre>{{`= ${bytes_to_number(bytes(), 'nosum')}`}}</pre>
-                    <pre>{{`Math.floor(${bytes_to_number(bytes(), 'nosum')} * ${MAX_ROLL}) / 100 = ${bytes_to_number(bytes())}`}}</pre>
-                    <pre>{{`Final roll: ${bytes_to_number(bytes())}`}}</pre>
+                    <pre>{{`= ${bytes_to_number(bytes())}`}}</pre>
+                    <pre v-if="active_game === 'Dice'">{{`Math.floor(${bytes_to_number(bytes())} * ${MAX_ROLL}) / 100 = ${result(active_game)}`}}</pre>
+                    <pre v-if="active_game === 'Roulette'">{{`Math.floor(${bytes_to_number(bytes())} * ${MAX_ROULETTE}) = ${result(active_game)}`}}</pre>
+                    <pre>{{`Final result: ${result(active_game)}`}}</pre>
                 </div>
             </div>
         </div>

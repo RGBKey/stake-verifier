@@ -22,7 +22,8 @@ const app = new Vue({
             {name: 'Dice'}
         ],
         active_game: '',
-        MAX_ROLL: 10001
+        MAX_ROLL: 10001,
+        MAX_ROULETTE: 37
     },
     created: function() {
         this.server_seed = this.$route.query.server_seed || '';
@@ -59,17 +60,20 @@ const app = new Vue({
                 }
             }
         },
-        bytes_to_number: function(bytes, option) {
+        bytes_to_number: function(bytes) {
             // Where bytes is a hex string
             let total = 0;
             for(let i = 0; i < 4; i++) {
                 total += parseInt(bytes.substr(i*2,2),16)/Math.pow(256,i+1);
             }
-            switch(option) {
-                case 'nosum':
-                    return total;
-                default:
-                    return (Math.floor(total * this.MAX_ROLL)/100).toFixed(2);
+            return total;
+        },
+        result: function(game) {
+            switch(game) {
+                case 'Dice':
+                    return (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROLL) / 100).toFixed(2);
+                case 'Roulette':
+                    return Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROULETTE);
             }
         }
     }
