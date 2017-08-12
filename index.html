@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stake.com Verifier</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div id="app">
+            <h1><a class="title-button" href="https://stake.com/?code=stakeverifier">Stake.com</a> Verifier</h1>
+            <div id="input" class="center-box">
+                <h2>Input</h2>
+                <input type="text" v-model="client_seed" placeholder="Client Seed">
+                <input type="text" v-model="server_seed" placeholder="Server Seed">
+                <input type="text" v-model="server_hash" placeholder="Server Seed Hash">
+                <input type="number" v-model="nonce" placeholder="Nonce">
+                <h3>Game</h3>
+                <div id="games">
+                    <span class="game" v-for="game in games" v-on:click="active_game = game.name" v-bind:class="{active: active_game === game.name}">{{game.name.replace(' ','&nbsp;')}}</span>
+                </div>
+            </div>
+            <div id="output" class="center-box">
+                <h2>Output</h2>
+                <pre v-if="server_seed">{{`sha256(server_seed): ${sha256(server_seed)}`}}</pre>
+                <pre v-if="server_seed && server_hash">Server seed matches provided hash: <span v-bind:result="seed_hash_match() || 'false'">{{seed_hash_match()}}</span></pre>
+                <pre v-if="client_seed && server_seed && nonce">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${round||0}`}}</pre>
+                <pre v-if="client_seed && server_seed && nonce">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${round||0}`)}`}}</pre>
+                <div v-if="active_game === 'Dice' && client_seed && server_seed && nonce">
+                    <h4>First four bytes</h4>
+                    <table>
+                        <tr>
+                            <td class="right">Hex</td>
+                            <td class="left" v-for="i in 4"><strong>{{bytes().substr((i-1)*2,2)}}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="right">Base 10</td>
+                            <td class="left" v-for="i in 4"><strong>{{parseInt(bytes().substr((i-1)*2,2),16)}}</strong></td>
+                        </tr>
+                    </table>
+                    <h4>Bytes to Number</h4>
+                    <pre v-for="i in 4">{{`${parseInt(bytes(i-1),16)} / 256 ^ ${i} = ${parseInt(bytes(i-1),16)/Math.pow(256,i)}`}}</pre>
+                    <pre>{{`${parseInt(bytes(0),16)/Math.pow(256,1)} + ${parseInt(bytes(1),16)/Math.pow(256,2)} + ${parseInt(bytes(2),16)/Math.pow(256,3)} + ${parseInt(bytes(3),16)/Math.pow(256,4)}`}}</pre>
+                    <pre>{{`= ${bytes_to_number(bytes(), 'nosum')}`}}</pre>
+                    <pre>{{`Math.floor(${bytes_to_number(bytes(), 'nosum')} * ${MAX_ROLL}) / 100 = ${bytes_to_number(bytes())}`}}</pre>
+                    <pre>{{`Final roll: ${bytes_to_number(bytes())}`}}</pre>
+                </div>
+            </div>
+        </div>
+        <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script>
+        <script src="https://unpkg.com/vue@2.4.2"></script>
+        <script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+        <script src="main.js"></script>
+    </body>
+</html>
