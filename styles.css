@@ -1,5 +1,6 @@
 a {
-    text-decoration: none;
+    text-decoration: underline;
+    color: #000000;
 }
 
 body {
@@ -63,6 +64,7 @@ table {
     background-color: #5DB9F7;
     border-radius: 0.3em;
     color: #000000;
+    text-decoration: none;
 }
 
 [result="true"] {
