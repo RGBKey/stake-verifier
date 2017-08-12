@@ -4,10 +4,10 @@ const app = new Vue({
     router,
     el: '#app',
     data: {
-        client_seed: '5a5eae3c4cf009f5',
-        server_seed: '9fa041264a884c9deb65751214aa70aa05846548942c79bf3e266c483775b800',
-        server_hash: '35d7268fb4b8b0b3b8678c6a51311f560d8b6f9896b43eb678c705a30d06f638',
-        nonce: 134,
+        client_seed: '',
+        server_seed: '',
+        server_hash: '',
+        nonce: null,
         round: null,
         games: [
             {name: 'Plinko'},
@@ -29,6 +29,7 @@ const app = new Vue({
         this.server_hash = this.$route.query.server_hash || '';
         this.client_seed = this.$route.query.client_seed || '';
         this.nonce = this.$route.query.nonce || null;
+        this.round = this.$route.query.round || null;
         this.active_game = this.$route.query.game || '';
     },
     methods: {
