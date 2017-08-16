@@ -31,9 +31,13 @@ table {
     margin: auto;
 }
 
+td {
+    border: 1px solid #000000;
+}
+
 .center-box {
     background-color: #FFFFFF;
-    width: 50%;
+    width: 70%;
     margin: 50px auto 50px auto;
     border-radius: 0.5em;
     border: 2px solid #EAEBF0;
@@ -45,6 +49,11 @@ table {
     border-radius: 0.3em;
     border: 2px solid #7C7E87;
     cursor: pointer;
+}
+
+.game.disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .game.active {
