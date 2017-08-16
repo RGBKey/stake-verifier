@@ -51,8 +51,8 @@
                         <tr>
                             <td><strong>Pin #</strong></td><td><strong>Number</strong></td><td><strong>Number * 2</strong></td><td><strong>Direction</strong></td>
                         </tr>
-                        <tr v-for="(num, i) in bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2}).substr(0,16)))">
-                            <td>{{i}}</td><td>{{num}}</td><td>{{num*2}}</td><td>{{Math.floor(num*2)?'right':'left'}}</td>
+                        <tr v-for="(num, i) in bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2}).substr(0,32)))">
+                            <td>{{i+1}}</td><td>{{num}}</td><td>{{num*2}}</td><td>{{Math.floor(num*2)?'right':'left'}}</td>
                         </tr>
                     </table>
                 </div>
