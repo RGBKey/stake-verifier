@@ -29,14 +29,16 @@
                 <pre v-if="client_seed && server_seed && nonce && active_game === 'Plinko'">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${1}`)}`}}</pre>
                 <pre v-if="client_seed && server_seed && nonce && active_game === 'Plinko'">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${2}`)}`}}</pre>
                 
-                <div v-if="(active_game === 'Dice' || active_game === 'Roulette') && client_seed && server_seed && nonce">
+                <div v-if="(active_game === 'Dice' || active_game === 'Roulette' || active_game === 'Chartbet') && client_seed && server_seed && nonce">
                     <h4>First four bytes</h4>
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes()).slice(0,4)" v-bind:dec="bytes_to_hex_array(bytes()).map(function(x){return parseInt(x,16)}).slice(0,4)"></hexdectable>
                     <h4>Bytes to Number</h4>
                     <numcalc v-bind:bytes="bytes_to_hex_array(bytes()).slice(0,4).map(function(x){return parseInt(x,16)})"></numcalc>
                     <pre v-if="active_game === 'Dice'">{{`Math.floor(${bytes_to_number(bytes())} * ${MAX_ROLL}) / 100 = ${result(active_game)}`}}</pre>
                     <pre v-if="active_game === 'Roulette'">{{`Math.floor(${bytes_to_number(bytes())} * ${MAX_ROULETTE}) = ${result(active_game)}`}}</pre>
-                    <pre>{{`Final result: ${result(active_game)}`}}</pre>
+                    <pre v-if="active_game === 'Chartbet'">{{`${MAX_CHARTBET} / (Math.floor(${bytes_to_number(bytes())} * ${MAX_CHARTBET}) + 1) * 0.98 = ${result(active_game)}`}}</pre>
+                    <pre v-if="active_game === 'Chartbet'">{{`Final result: ${result(active_game).toFixed(2)+'x'}`}}</pre>
+                    <pre v-else>{{`Final result: ${result(active_game)}`}}</pre>
                 </div>
 
                 <div v-if="(active_game === 'Plinko') && client_seed && server_seed && nonce">

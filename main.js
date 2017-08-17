@@ -40,7 +40,7 @@ const app = new Vue({
         games: [
             {name: 'Plinko'},
             {name: 'Mines', disabled: true},
-            {name: 'Chartbet', disabled: true},
+            {name: 'Chartbet'},
             {name: 'Hilo', disabled: true},
             {name: 'Blackjack', disabled: true},
             {name: 'Diamond Poker', disabled: true},
@@ -51,7 +51,8 @@ const app = new Vue({
         ],
         active_game: '',
         MAX_ROLL: 10001,
-        MAX_ROULETTE: 37
+        MAX_ROULETTE: 37,
+        MAX_CHARTBET: 1000000
     },
     components: {
         hexdectable,
@@ -141,6 +142,8 @@ const app = new Vue({
                     return (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROLL) / 100).toFixed(2);
                 case 'Roulette':
                     return Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROULETTE);
+                case 'Chartbet':
+                    return (this.MAX_CHARTBET / (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_CHARTBET) + 1) * 0.98);
                 default:
                     return 'Unknown game';
             }
