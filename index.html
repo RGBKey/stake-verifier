@@ -13,6 +13,7 @@
                 <input type="text" v-model="server_seed" placeholder="Server Seed">
                 <input type="text" v-model="server_hash" placeholder="Server Seed Hash">
                 <input type="number" v-model="nonce" placeholder="Nonce">
+                <input v-if="active_game === 'Mines'" type="number" v-model="numMines" min="1" max="24" placeholder="Number of Mines">
                 <h3>Game</h3>
                 <div id="games">
                     <span class="game" v-for="game in games" v-on:click="active_game = game.name" v-bind:class="{active: active_game === game.name, disabled: game.disabled}">{{game.name.replace(' ','&nbsp;')}}</span>
@@ -22,14 +23,14 @@
                 <h2>Output</h2>
                 <pre v-if="server_seed">{{`sha256(server_seed): ${sha256(server_seed)}`}}</pre>
                 <pre v-if="server_seed && server_hash">Server seed matches provided hash: <span v-bind:result="seed_hash_match() || 'false'">{{seed_hash_match()}}</span></pre>
-                <pre v-if="client_seed && server_seed && nonce">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${round||0}`}}</pre>
-                <pre v-if="client_seed && server_seed && nonce && active_game === 'Plinko'">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${1}`}}</pre>
-                <pre v-if="client_seed && server_seed && nonce && active_game === 'Plinko'">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${2}`}}</pre>
-                <pre v-if="client_seed && server_seed && nonce">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${round||0}`)}`}}</pre>
-                <pre v-if="client_seed && server_seed && nonce && active_game === 'Plinko'">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${1}`)}`}}</pre>
-                <pre v-if="client_seed && server_seed && nonce && active_game === 'Plinko'">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${2}`)}`}}</pre>
+                <pre v-if="all_info()">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${round||0}`}}</pre>
+                <pre v-if="all_info() && active_game === 'Plinko'">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${1}`}}</pre>
+                <pre v-if="all_info() && active_game === 'Plinko'">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${2}`}}</pre>
+                <pre v-if="all_info()">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${round||0}`)}`}}</pre>
+                <pre v-if="all_info() && active_game === 'Plinko'">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${1}`)}`}}</pre>
+                <pre v-if="all_info() && active_game === 'Plinko'">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${2}`)}`}}</pre>
                 
-                <div v-if="(active_game === 'Dice' || active_game === 'Roulette' || active_game === 'Chartbet') && client_seed && server_seed && nonce">
+                <div v-if="(active_game === 'Dice' || active_game === 'Roulette' || active_game === 'Chartbet') && all_info()">
                     <h4>First four bytes</h4>
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes()).slice(0,4)" v-bind:dec="bytes_to_hex_array(bytes()).map(function(x){return parseInt(x,16)}).slice(0,4)"></hexdectable>
                     <h4>Bytes to Number</h4>
@@ -41,7 +42,7 @@
                     <pre v-else>{{`Final result: ${result(active_game)}`}}</pre>
                 </div>
 
-                <div v-if="(active_game === 'Plinko') && client_seed && server_seed && nonce">
+                <div v-if="(active_game === 'Plinko') && all_info()">
                     <h4>Convert each set of four bytes into a number</h4>
                     <p><i>Note: 20 "directions" will be displayed but only the amount corresponding to the amount of pins is used</i></p>
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes())" v-bind:dec="bytes_to_hex_array(bytes()).map(leading_zeroes)"></hexdectable>
@@ -57,6 +58,28 @@
                             <td>{{i+1}}</td><td>{{num}}</td><td>{{num*2}}</td><td>{{Math.floor(num*2)?'right':'left'}}</td>
                         </tr>
                     </table>
+                </div>
+
+                <div v-if="all_info() && active_game === 'Mines'">
+                    <h4>Convert each set of four bytes into a number</h4>
+                    <hexdectable v-bind:hex="bytes_to_hex_array(bytes())" v-bind:dec="bytes_to_hex_array(bytes()).map(leading_zeroes)"></hexdectable>
+                    <hexdectable v-bind:hex="bytes_to_hex_array(bytes({round:1}))" v-bind:dec="bytes_to_hex_array(bytes({round:1})).map(leading_zeroes)"></hexdectable>
+                    <hexdectable v-bind:hex="bytes_to_hex_array(bytes({round:2}))" v-bind:dec="bytes_to_hex_array(bytes({round:2})).map(leading_zeroes)"></hexdectable>
+                    <p>Each set of 4 bytes is turned into a number in the range <code>[0, 1)</code>. Only the first calculation is displayed for conciceness.</p>
+                    <numcalc v-bind:bytes="bytes_to_hex_array(bytes()).slice(0,4).map(function(x){return parseInt(x,16)})"></numcalc>
+                    <p>The 24 numbers below are used to shuffle the set of 25 possible positions for mines. The mines are placed in the positions below until you hit the number of mines you used for the game.
+                        As each number in the range <code>[0,1)</code> is calculated, it is multiplied by the number of remaining positions, starting with 25. That position is then picked and removed from the list of positions.
+                        As 24 numbers are picked and the game allows a max of 24 mines, there will always be one position empty no matter how many mines are chosen.
+                    </p>
+                    <table>
+                        <tr>
+                            <td><strong>Pick</strong></td><td><strong>Number</strong></td><td><strong>Multiplier</strong></td><td><strong>Result</strong></td><td><strong>Position Picked</strong></td>
+                        </tr>
+                        <tr v-for="(num, i) in bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2})))">
+                            <td>{{i+1}}</td><td>{{num}}</td><td>{{25-i}}</td><td>{{Math.floor(num*(25-i))}}</td><td>{{result('Mines')[i]}}</td>
+                        </tr>
+                    </table>
+                    <minefield v-bind:mines="result('Mines').slice(0,numMines)"></minefield>
                 </div>
             </div>
             <p><a href="https://github.com/RGBKey/stake-verifier">GitHub Source</a> &bull; Donations: <a href="bitcoin:146LimMTUjTsZhVnfKEqYBtUDfHVqinxH6?label=Stake%20Verifier%20Donation">146LimMTUjTsZhVnfKEqYBtUDfHVqinxH6</a></p>

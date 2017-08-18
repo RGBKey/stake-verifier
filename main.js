@@ -26,6 +26,15 @@ const numcalc = {
     </div>`
 };
 
+const minefield = {
+    props: ['mines'],
+    template: `<table>
+        <tr v-for="j in 5">
+            <td v-for="i in 5"><img height="50" width="50" v-bind:src="mines.indexOf(((j-1)*5+(i-1)))>=0?'img/mine.png':'img/gem.png'"></img></td>
+        </tr>
+    </table>`
+};
+
 const router = new VueRouter();
 
 const app = new Vue({
@@ -39,7 +48,7 @@ const app = new Vue({
         round: null,
         games: [
             {name: 'Plinko'},
-            {name: 'Mines', disabled: true},
+            {name: 'Mines'},
             {name: 'Chartbet'},
             {name: 'Hilo', disabled: true},
             {name: 'Blackjack', disabled: true},
@@ -49,6 +58,7 @@ const app = new Vue({
             {name: 'Baccarat', disabled: true},
             {name: 'Dice'}
         ],
+        numMines: 1,
         active_game: '',
         MAX_ROLL: 10001,
         MAX_ROULETTE: 37,
@@ -56,7 +66,8 @@ const app = new Vue({
     },
     components: {
         hexdectable,
-        numcalc
+        numcalc,
+        minefield
     },
     created: function() {
         this.server_seed = this.$route.query.server_seed || '';
@@ -83,6 +94,9 @@ const app = new Vue({
                 return this.sha256(this.server_seed) === this.server_hash;
             }
             return false;
+        },
+        all_info: function() {
+            return this.server_seed && this.client_seed && this.nonce;
         },
         bytes: function(options) {
             // Forgive me for these ternary statements
@@ -125,6 +139,14 @@ const app = new Vue({
             }
             return totals;
         },
+        nums_to_mine_array: function(nums) {
+            let mines = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+            let result = [];
+            for(let i = 0; i < nums.length; i++) {
+                result.push(mines.splice(Math.floor((25-i)*nums[i]), 1)[0]);
+            }
+            return result;
+        },
         leading_zeroes: function(item) {
             // Take a hex number and make it a 3 digit decimal number
             item = parseInt(item, 16);
@@ -144,6 +166,8 @@ const app = new Vue({
                     return Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROULETTE);
                 case 'Chartbet':
                     return (this.MAX_CHARTBET / (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_CHARTBET) + 1) * 0.98);
+                case 'Mines':
+                    return this.nums_to_mine_array(this.bytes_to_num_array(this.bytes().concat(this.bytes({round:1})).concat(this.bytes({round:2}))));
                 default:
                     return 'Unknown game';
             }

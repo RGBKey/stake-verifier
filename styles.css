@@ -23,6 +23,10 @@ input[type="text"] {
     width: 50%;
 }
 
+input[type="number"] {
+    width: 15%;
+}
+
 input:focus {
     outline:none;
 }
