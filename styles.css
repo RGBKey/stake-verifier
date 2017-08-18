@@ -32,7 +32,7 @@ input:focus {
 }
 
 table {
-    margin: auto;
+    margin: 10px auto 10px auto;
 }
 
 td {
@@ -48,11 +48,12 @@ td {
 }
 
 .game {
-    margin: 5px;
+    margin: 10px;
     font-size: 1.5em;
     border-radius: 0.3em;
     border: 2px solid #7C7E87;
     cursor: pointer;
+    display: inline-block;
 }
 
 .game.disabled {
