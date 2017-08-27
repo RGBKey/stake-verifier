@@ -35,6 +35,32 @@ const minefield = {
     </table>`
 };
 
+const diamondPoker = {
+    props: ['diamonds'],
+    methods: {
+        toImg: function(x) {
+            let images = [
+                'img/green.svg',
+                'img/purple.svg',
+                'img/yellow.svg',
+                'img/red.svg',
+                'img/cyan.svg',
+                'img/orange.svg',
+                'img/blue.svg'
+            ];
+            return images[x];
+        }
+    },
+    template: `<table>
+        <tr>
+            <td v-for="diamond in diamonds.slice(0,5)"><img height="100" width="100" v-bind:src="toImg(diamond)"></img></td>
+        </tr>
+        <tr>
+            <td v-for="diamond in diamonds.slice(5,10)"><img height="100" width="100" v-bind:src="toImg(diamond)"></img></td>
+        </tr>
+    </table>`
+};
+
 const router = new VueRouter();
 
 const app = new Vue({
@@ -52,7 +78,7 @@ const app = new Vue({
             {name: 'Chartbet'},
             {name: 'Hilo', disabled: true},
             {name: 'Blackjack', disabled: true},
-            {name: 'Diamond Poker', disabled: true},
+            {name: 'Diamond Poker'},
             {name: 'Roulette'},
             {name: 'Keno', disabled: true},
             {name: 'Baccarat', disabled: true},
@@ -67,7 +93,8 @@ const app = new Vue({
     components: {
         hexdectable,
         numcalc,
-        minefield
+        minefield,
+        diamondPoker
     },
     created: function() {
         this.server_seed = this.$route.query.server_seed || '';
