@@ -26,13 +26,50 @@ const numcalc = {
     </div>`
 };
 
+const shuffleTable = {
+    // Nums is an array of numbers in the [0, 1) range and pick is the number of indicies to pick
+    props: ['nums', 'pick'],
+    methods: {
+        numsToIndicies: function(nums) {
+            let indicies = [];
+            let result = [];
+            let length = nums.length;
+            nums = nums.slice(); // Eliminate aliasing
+            let pick = parseInt(this.pick);
+            for(let i = 1; i <= length; i++) {
+                indicies.push(i);
+            }
+            for(let i = 0; i < length; i++) {
+                nums[i] = Math.floor(nums[i] * (25 - i));
+            }
+            for(let i = 0; i < pick; i++) {
+                result.push(indicies[nums[i]]);
+            }
+            return result;
+        }
+    },
+    template: `<div>
+        <p>The following shuffle step works like such: First, an array containing all possible outcomes is created. 
+        Then, the number of desired outcomes (the number of picks) is taken from the array of outcomes by taking the next number generated in the method shown above, 
+        multiplying it by the number of remaining outcomes, and taking the outcome from that position. Once that outcome is picked it is removed from the array and cannot be picked again.</p>
+        <table>
+            <tr><td>Pick #</td><td>Number</td><td>Multiplier</td><td>&lfloor;Number * Multiplier&rfloor;</td><td>Result</td></tr>
+            <tr v-for="(pick, i) in numsToIndicies(nums)">
+                <td>{{i+1}}</td><td>{{nums[i]}}</td><td>{{25-i}}</td><td>{{Math.floor(nums[i] * (25 - i))}}</td><td>{{numsToIndicies(nums)[i]}}</td>
+            </tr>
+        </table>
+    </div>`
+};
+
 const minefield = {
     props: ['mines'],
-    template: `<table>
-        <tr v-for="j in 5">
-            <td v-for="i in 5"><img height="50" width="50" v-bind:src="mines.indexOf(((j-1)*5+(i-1)))>=0?'img/mine.png':'img/gem.png'"></img></td>
-        </tr>
-    </table>`
+    template: `<div>
+        <table>
+            <tr v-for="j in 5">
+                <td v-for="i in 5"><img height="50" width="50" v-bind:src="mines.indexOf(((j-1)*5+(i-1)))>=0?'img/mine.png':'img/gem.png'"></img></td>
+            </tr>
+        </table>
+    </div>`
 };
 
 const diamondPoker = {
@@ -94,7 +131,8 @@ const app = new Vue({
         hexdectable,
         numcalc,
         minefield,
-        diamondPoker
+        diamondPoker,
+        shuffleTable
     },
     created: function() {
         this.server_seed = this.$route.query.server_seed || '';
@@ -103,6 +141,7 @@ const app = new Vue({
         this.nonce = this.$route.query.nonce || null;
         this.round = this.$route.query.round || 0;
         this.active_game = this.$route.query.game || '';
+        this.numMines = this.$route.query.num_mines || 1;
     },
     methods: {
         sha256: function(data) {

@@ -67,18 +67,8 @@
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes({round:2}))" v-bind:dec="bytes_to_hex_array(bytes({round:2})).map(leading_zeroes)"></hexdectable>
                     <p>Each set of 4 bytes is turned into a number in the range <code>[0, 1)</code>. Only the first calculation is displayed for conciceness.</p>
                     <numcalc v-bind:bytes="bytes_to_hex_array(bytes()).slice(0,4).map(function(x){return parseInt(x,16)})"></numcalc>
-                    <p>The 24 numbers below are used to shuffle the set of 25 possible positions for mines. The mines are placed in the positions below until you hit the number of mines you used for the game.
-                        As each number in the range <code>[0,1)</code> is calculated, it is multiplied by the number of remaining positions, starting with 25. That position is then picked and removed from the list of positions.
-                        As 24 numbers are picked and the game allows a max of 24 mines, there will always be one position empty no matter how many mines are chosen.
-                    </p>
-                    <table>
-                        <tr>
-                            <td><strong>Pick</strong></td><td><strong>Number</strong></td><td><strong>Multiplier</strong></td><td><strong>Result</strong></td><td><strong>Position Picked</strong></td>
-                        </tr>
-                        <tr v-for="(num, i) in bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2})))">
-                            <td>{{i+1}}</td><td>{{num}}</td><td>{{25-i}}</td><td>{{Math.floor(num*(25-i))}}</td><td>{{result('Mines')[i]}}</td>
-                        </tr>
-                    </table>
+                    <shuffle-table v-bind:nums="bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2})))" v-bind:pick="numMines"></shuffle-table>
+                    <p>Each item in the Result column above represents the one-indexed position of a mine going from left to right, top to bottom</p>
                     <minefield v-bind:mines="result('Mines').slice(0,numMines)"></minefield>
                 </div>
 
