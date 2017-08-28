@@ -28,22 +28,21 @@ const numcalc = {
 
 const shuffleTable = {
     // Nums is an array of numbers in the [0, 1) range and pick is the number of indicies to pick
-    props: ['nums', 'pick'],
+    props: ['nums', 'pick', 'total'],
     methods: {
         numsToIndicies: function(nums) {
             let indicies = [];
             let result = [];
-            let length = nums.length;
             nums = nums.slice(); // Eliminate aliasing
             let pick = parseInt(this.pick);
-            for(let i = 1; i <= length; i++) {
+            for(let i = 1; i <= this.total; i++) {
                 indicies.push(i);
             }
-            for(let i = 0; i < length; i++) {
-                nums[i] = Math.floor(nums[i] * (25 - i));
+            for(let i = 0; i < nums.length; i++) {
+                nums[i] = Math.floor(nums[i] * (this.total - i));
             }
             for(let i = 0; i < pick; i++) {
-                result.push(indicies[nums[i]]);
+                result.push(indicies.splice(nums[i],1)[0]);
             }
             return result;
         }
@@ -55,7 +54,7 @@ const shuffleTable = {
         <table>
             <tr><td>Pick #</td><td>Number</td><td>Multiplier</td><td>&lfloor;Number * Multiplier&rfloor;</td><td>Result</td></tr>
             <tr v-for="(pick, i) in numsToIndicies(nums)">
-                <td>{{i+1}}</td><td>{{nums[i]}}</td><td>{{25-i}}</td><td>{{Math.floor(nums[i] * (25 - i))}}</td><td>{{numsToIndicies(nums)[i]}}</td>
+                <td>{{i+1}}</td><td>{{nums[i]}}</td><td>{{total-i}}</td><td>{{Math.floor(nums[i] * (total - i))}}</td><td>{{numsToIndicies(nums)[i]}}</td>
             </tr>
         </table>
     </div>`
@@ -63,13 +62,11 @@ const shuffleTable = {
 
 const minefield = {
     props: ['mines'],
-    template: `<div>
-        <table>
-            <tr v-for="j in 5">
-                <td v-for="i in 5"><img height="50" width="50" v-bind:src="mines.indexOf(((j-1)*5+(i-1)))>=0?'img/mine.png':'img/gem.png'"></img></td>
-            </tr>
-        </table>
-    </div>`
+    template: `<table>
+        <tr v-for="j in 5">
+            <td v-for="i in 5"><img height="50" width="50" v-bind:src="mines.indexOf(((j-1)*5+(i-1)))>=0?'img/mine.png':'img/gem.png'"></img></td>
+        </tr>
+    </table>`
 };
 
 const diamondPoker = {
@@ -98,6 +95,15 @@ const diamondPoker = {
     </table>`
 };
 
+const keno = {
+    props: ['tiles'],
+    template: `<table>
+        <tr v-for="i in 5">
+            <td v-for="j in 8" height="50" width="50"><img v-if="tiles.indexOf((i-1)*8 + (j-1)) >= 0" src="img/keno.svg"></img></td>
+        </tr>
+    </table>`
+};
+
 const router = new VueRouter();
 
 const app = new Vue({
@@ -117,7 +123,7 @@ const app = new Vue({
             {name: 'Blackjack', disabled: true},
             {name: 'Diamond Poker'},
             {name: 'Roulette'},
-            {name: 'Keno', disabled: true},
+            {name: 'Keno'},
             {name: 'Baccarat', disabled: true},
             {name: 'Dice'}
         ],
@@ -132,7 +138,8 @@ const app = new Vue({
         numcalc,
         minefield,
         diamondPoker,
-        shuffleTable
+        shuffleTable,
+        keno
     },
     created: function() {
         this.server_seed = this.$route.query.server_seed || '';
@@ -213,6 +220,17 @@ const app = new Vue({
             }
             return result;
         },
+        nums_to_tile_array: function(nums) {
+            let tiles = [];
+            let result = [];
+            for(let i = 0; i < 40; i++) {
+                tiles.push(i);
+            }
+            for(let i = 0; i < nums.length; i++) {
+                result.push(tiles.splice(Math.floor(nums[i] * (40 - i)), 1)[0]);
+            }
+            return result;
+        },
         leading_zeroes: function(item) {
             // Take a hex number and make it a 3 digit decimal number
             item = parseInt(item, 16);
@@ -234,6 +252,8 @@ const app = new Vue({
                     return (this.MAX_CHARTBET / (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_CHARTBET) + 1) * 0.98);
                 case 'Mines':
                     return this.nums_to_mine_array(this.bytes_to_num_array(this.bytes().concat(this.bytes({round:1})).concat(this.bytes({round:2}))));
+                case 'Keno':
+                    return this.nums_to_tile_array(this.bytes_to_num_array(this.bytes()+this.bytes({round:1}).substr(0,16)));
                 default:
                     return 'Unknown game';
             }

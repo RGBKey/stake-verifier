@@ -24,10 +24,10 @@
                 <pre v-if="server_seed">{{`sha256(server_seed): ${sha256(server_seed)}`}}</pre>
                 <pre v-if="server_seed && server_hash">Server seed matches provided hash: <span v-bind:result="seed_hash_match() || 'false'">{{seed_hash_match()}}</span></pre>
                 <pre v-if="all_info()">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${round||0}`}}</pre>
-                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${1}`}}</pre>
+                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker','Keno'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${1}`}}</pre>
                 <pre v-if="all_info() && ['Plinko','Mines'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:${2}`}}</pre>
                 <pre v-if="all_info()">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${round||0}`)}`}}</pre>
-                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${1}`)}`}}</pre>
+                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker','Keno'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${1}`)}`}}</pre>
                 <pre v-if="all_info() && ['Plinko','Mines'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:${2}`)}`}}</pre>
                 
                 <div v-if="(active_game === 'Dice' || active_game === 'Roulette' || active_game === 'Chartbet') && all_info()">
@@ -67,7 +67,7 @@
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes({round:2}))" v-bind:dec="bytes_to_hex_array(bytes({round:2})).map(leading_zeroes)"></hexdectable>
                     <p>Each set of 4 bytes is turned into a number in the range <code>[0, 1)</code>. Only the first calculation is displayed for conciceness.</p>
                     <numcalc v-bind:bytes="bytes_to_hex_array(bytes()).slice(0,4).map(function(x){return parseInt(x,16)})"></numcalc>
-                    <shuffle-table v-bind:nums="bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2})))" v-bind:pick="numMines"></shuffle-table>
+                    <shuffle-table v-bind:nums="bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2})))" v-bind:pick="numMines" total="25"></shuffle-table>
                     <p>Each item in the Result column above represents the one-indexed position of a mine going from left to right, top to bottom</p>
                     <minefield v-bind:mines="result('Mines').slice(0,numMines)"></minefield>
                 </div>
@@ -87,6 +87,17 @@
                         </tr>
                     </table>
                     <diamond-poker v-bind:diamonds="bytes_to_num_array(bytes()+bytes({round:1}).substr(0,16)).map((x)=>{return Math.floor(x*7)})"></diamond-poker>
+                </div>
+
+                <div v-if="all_info() && active_game === 'Keno'">
+                    <h4>Convert each set of four bytes into a number</h4>
+                    <hexdectable v-bind:hex="bytes_to_hex_array(bytes())" v-bind:dec="bytes_to_hex_array(bytes()).map(leading_zeroes)"></hexdectable>
+                    <hexdectable v-bind:hex="bytes_to_hex_array(bytes({round:1})).slice(0,8)" v-bind:dec="bytes_to_hex_array(bytes({round:1})).map(leading_zeroes).slice(0,8)"></hexdectable>
+                    <p>Each set of 4 bytes is turned into a number in the range <code>[0, 1)</code>. Only the first calculation is displayed for conciceness.</p>
+                    <numcalc v-bind:bytes="bytes_to_hex_array(bytes()).slice(0,4).map(function(x){return parseInt(x,16)})"></numcalc>
+                    <shuffle-table v-bind:nums="bytes_to_num_array(bytes()+bytes({round:1})+(bytes({round:2})).substr(0,16))" pick="10" total="40"></shuffle-table>
+                    <p>Each item in the Result column represents the one-indexed position of a Keno pick going from left to right, top to bottom</p>
+                    <keno v-bind:tiles="result('Keno')"></keno>
                 </div>
             </div>
             <p><a href="https://github.com/RGBKey/stake-verifier">GitHub Source</a> &bull; Donations: <a href="bitcoin:146LimMTUjTsZhVnfKEqYBtUDfHVqinxH6?label=Stake%20Verifier%20Donation">146LimMTUjTsZhVnfKEqYBtUDfHVqinxH6</a></p>
