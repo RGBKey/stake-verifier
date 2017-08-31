@@ -114,7 +114,6 @@ const app = new Vue({
         server_seed: '',
         server_hash: '',
         nonce: null,
-        round: null,
         games: [
             {name: 'Plinko'},
             {name: 'Mines'},
@@ -146,52 +145,86 @@ const app = new Vue({
         this.server_hash = this.$route.query.server_hash || '';
         this.client_seed = this.$route.query.client_seed || '';
         this.nonce = this.$route.query.nonce || null;
-        this.round = this.$route.query.round || 0;
         this.active_game = this.$route.query.game || '';
         this.numMines = this.$route.query.num_mines || 1;
     },
     methods: {
+        /**
+         * Returns the SHA256 hash of the input
+         * @param {string} data - The data to hash
+         * @returns {string} The hex representation of the SHA256 hash
+         */
         sha256: function(data) {
             let md = forge.md.sha256.create();
             md.update(data);
             return md.digest().toHex();
         },
+        /**
+         * Returns the HMAC SHA256 hash of the arguments
+         * @param {string} K - The key part of the HMAC digest
+         * @param {string} m - The message part of the HMAC digest
+         * @returns {string} The hex representation of the HMAC SHA256 hash
+         */
         hmac_sha256: function(K, m) {
             let hmac = forge.hmac.create();
             hmac.start('sha256', K);
             hmac.update(m);
             return hmac.digest().toHex();
         },
+        /**
+         * Returns a true if the server seed and provided hash match
+         * @returns {boolean} True if the server seed hash matches the provided hash
+         */
         seed_hash_match: function() {
             if(this.server_seed && this.server_hash) {
                 return this.sha256(this.server_seed) === this.server_hash;
             }
             return false;
         },
+        /**
+         * Returns true if the server seed, client seed and nonce are all present
+         * @returns {boolean}
+         */
         all_info: function() {
             return this.server_seed && this.client_seed && this.nonce;
         },
-        bytes: function(options) {
-            // Forgive me for these ternary statements
-            let i = options ? options.i : null;
-            let round = options ? options.round : 0;
-            if(this.client_seed && this.server_seed && this.nonce) {
-                // Take care to note the intentional lack of `this` on the round for the two following return statements
-                if(typeof i !== 'number') {
-                    return this.hmac_sha256(this.server_seed, `${this.client_seed}:${this.nonce||0}:${round}`);
-                } else {
-                    return this.hmac_sha256(this.server_seed, `${this.client_seed}:${this.nonce||0}:${round}`).substr(i*2,2);
-                }
+        /**
+         * Returns the hex string calculated by hashint the server seed, client seed, nonce and round
+         * @param {number} length - The length IN HEX CHARACTERS of the string to return.
+         * @param {number} num - If defined, the string is truncated to the last n=num characters
+         * @returns {string} A hex string
+         */
+        bytes: function(length, num) {
+            let result = '';
+            let round = 0;
+            while(result.length < length) {
+                result += this.hmac_sha256(this.server_seed, `${this.client_seed}:${this.nonce||0}:${round++}`);
             }
+            if(result.length > length) {
+                result = result.substring(0, length);
+            }
+            if(num) {
+                result = result.substring(length - num, length);
+            }
+            return result;
         },
+        /**
+         * Returns a number in the range [0, 1)
+         * @param {string} bytes - The 8 character (4 byte) hex string to convert to a number
+         * @returns {number} A number in the range [0, 1)
+         */
         bytes_to_number: function(bytes) {
-            // Where bytes is a hex string with 8 hex digits
             let total = 0;
             for(let i = 0; i < 4; i++) {
                 total += parseInt(bytes.substr(i*2, 2),16)/Math.pow(256, i+1);
             }
             return total;
         },
+        /**
+         * Splits a string of characters into an array of two character chunks
+         * @param {string} bytes - The string of hex digits
+         * @returns {string[]} The array of 2 character chunks
+         */
         bytes_to_hex_array: function(bytes) {
             let hex = [];
             for(let i = 0; i < bytes.length; i += 2) {
@@ -199,27 +232,39 @@ const app = new Vue({
             }
             return hex;
         },
+        /**
+         * Takes a string of hex digits and converts them to an array of numbers
+         * @param {string} bytes - A string of hex digits with length evenly divisible by 8
+         * @returns {number[]} An array of numbers in the range [0, 1)
+         */
         bytes_to_num_array: function(bytes) {
-            // Where bytes is a hex string of any even-numbered length
             let totals = [];
-            // Loop through each segment of 2 hex digits
-            for(let j = 0; j*8 < bytes.length; j++) {
-                let total = 0;
-                for(let i = 0; i < 4; i++) {
-                    total += parseInt(bytes.substr((j*8)+(i*2), 2), 16)/Math.pow(256, i+1);
-                }
-                totals.push(total);
+            for(let i = 0; i*8 < bytes.length; i++) {
+                totals.push(this.bytes_to_number(bytes.substr(i*8), 8));
             }
             return totals;
         },
+        /**
+         * Returns the array of the 24 mine positions in order
+         * @param {number[]} nums - The array of numbers
+         * @returns {number[]} The array of mine positions
+         */
         nums_to_mine_array: function(nums) {
-            let mines = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+            let mines = [];
+            for(let i = 0; i < 25; i++) {
+                mines.push(i);
+            }
             let result = [];
             for(let i = 0; i < nums.length; i++) {
                 result.push(mines.splice(Math.floor((25-i)*nums[i]), 1)[0]);
             }
             return result;
         },
+        /**
+         * Returns the array of tile positions (Keno) in order
+         * @param {number[]} nums - The array of numbers
+         * @returns {number[]} The array of tile positions
+         */
         nums_to_tile_array: function(nums) {
             let tiles = [];
             let result = [];
@@ -231,8 +276,12 @@ const app = new Vue({
             }
             return result;
         },
+        /**
+         * Takes a hex string and converts it into a base10 string with exactly 3 digits
+         * @param {string} item - A hex string
+         * @returns {string} A base 10 string of length 3
+         */
         leading_zeroes: function(item) {
-            // Take a hex number and make it a 3 digit decimal number
             item = parseInt(item, 16);
             if(item < 10) {
                 return '00' + item;
@@ -242,18 +291,23 @@ const app = new Vue({
                 return item;
             }
         },
+        /**
+         * Returns the final result for many games
+         * @param {string} game - The game to return the result for
+         * @returns The result for the game
+         */
         result: function(game) {
             switch(game) {
                 case 'Dice':
-                    return (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROLL) / 100).toFixed(2);
+                    return (Math.floor(this.bytes_to_number(this.bytes(8)) * this.MAX_ROLL) / 100).toFixed(2);
                 case 'Roulette':
-                    return Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_ROULETTE);
+                    return Math.floor(this.bytes_to_number(this.bytes(8)) * this.MAX_ROULETTE);
                 case 'Chartbet':
-                    return (this.MAX_CHARTBET / (Math.floor(this.bytes_to_number(this.bytes()) * this.MAX_CHARTBET) + 1) * 0.98);
+                    return (this.MAX_CHARTBET / (Math.floor(this.bytes_to_number(this.bytes(8)) * this.MAX_CHARTBET) + 1) * 0.98);
                 case 'Mines':
-                    return this.nums_to_mine_array(this.bytes_to_num_array(this.bytes().concat(this.bytes({round:1})).concat(this.bytes({round:2}))));
+                    return this.nums_to_mine_array(this.bytes_to_num_array(this.bytes(196)));
                 case 'Keno':
-                    return this.nums_to_tile_array(this.bytes_to_num_array(this.bytes()+this.bytes({round:1}).substr(0,16)));
+                    return this.nums_to_tile_array(this.bytes_to_num_array(this.bytes(80)));
                 default:
                     return 'Unknown game';
             }
