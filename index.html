@@ -24,19 +24,19 @@
                 <pre v-if="server_seed">{{`sha256(server_seed): ${sha256(server_seed)}`}}</pre>
                 <pre v-if="server_seed && server_hash">Server seed matches provided hash: <span v-bind:result="seed_hash_match() || 'false'">{{seed_hash_match()}}</span></pre>
                 <pre v-if="all_info()">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:0`}}</pre>
-                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker','Keno', 'Hilo'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:1`}}</pre>
-                <pre v-if="all_info() && ['Plinko','Mines', 'Hilo'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:2`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:3`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:4`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:5`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:6`}}</pre>
+                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker','Keno', 'Hilo','Blackjack'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:1`}}</pre>
+                <pre v-if="all_info() && ['Plinko','Mines', 'Hilo','Blackjack'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:2`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:3`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:4`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:5`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`(client_seed:nonce:round): ${client_seed}:${nonce||0}:6`}}</pre>
                 <pre v-if="all_info()">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:0`)}`}}</pre>
-                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker','Keno'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:1`)}`}}</pre>
-                <pre v-if="all_info() && ['Plinko','Mines'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:2`)}`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:3`)}`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:4`)}`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:5`)}`}}</pre>
-                <pre v-if="all_info() && ['Hilo'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:6`)}`}}</pre>
+                <pre v-if="all_info() && ['Plinko','Mines','Diamond Poker','Keno','Hilo','Blackjack'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:1`)}`}}</pre>
+                <pre v-if="all_info() && ['Plinko','Mines','Hilo','Blackjack'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:2`)}`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:3`)}`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:4`)}`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:5`)}`}}</pre>
+                <pre v-if="all_info() && ['Hilo','Blackjack'].indexOf(active_game)>=0">{{`hmac_sha256(server_seed, client_seed:nonce:round): ${hmac_sha256(server_seed, `${client_seed}:${nonce||0}:6`)}`}}</pre>
                 
                 <div v-if="(active_game === 'Dice' || active_game === 'Roulette' || active_game === 'Chartbet') && all_info()">
                     <h4>First four bytes</h4>
@@ -68,7 +68,7 @@
                     </table>
                 </div>
 
-                <div v-if="(active_game === 'Hilo') && all_info()">
+                <div v-if="(['Hilo','Blackjack'].indexOf(active_game) >= 0) && all_info()">
                     <h4>Convert each set of four bytes into a number</h4>
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes(64))" v-bind:dec="bytes_to_hex_array(bytes(64)).map(leading_zeroes)"></hexdectable>
                     <hexdectable v-bind:hex="bytes_to_hex_array(bytes(128, 64))" v-bind:dec="bytes_to_hex_array(bytes(128, 64)).map(leading_zeroes)"></hexdectable>
