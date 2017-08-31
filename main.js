@@ -118,7 +118,7 @@ const app = new Vue({
             {name: 'Plinko'},
             {name: 'Mines'},
             {name: 'Chartbet'},
-            {name: 'Hilo', disabled: true},
+            {name: 'Hilo'},
             {name: 'Blackjack', disabled: true},
             {name: 'Diamond Poker'},
             {name: 'Roulette'},
@@ -275,6 +275,21 @@ const app = new Vue({
                 result.push(tiles.splice(Math.floor(nums[i] * (40 - i)), 1)[0]);
             }
             return result;
+        },
+        /**
+         * Returns the array of cards from the numbers
+         * @param {number[]} nums - The array of numbers
+         * @returns {string[]} - The array of cards
+         */
+        nums_to_card_array: function(nums) {
+            const cards = ['&spades;2', '&hearts;2', '&diams;2', '&clubs;2', '&spades;3', '&hearts;3', '&diams;3', '&clubs;3', '&spades;4', '&hearts;4', '&diams;4', '&clubs;4',
+            '&spades;5', '&hearts;5', '&diams;5', '&clubs;5', '&spades;6', '&hearts;6', '&diams;6', '&clubs;6', '&spades;7', '&hearts;7', '&diams;7', '&clubs;7', '&spades;8', '&hearts;8',
+            '&diams;8', '&clubs;8', '&spades;9', '&hearts;9', '&diams;9', '&clubs;9', '&spades;10', '&hearts;10', '&diams;10', '&clubs;10', '&spades;J', '&hearts;J', '&diams;J', '&clubs;J',
+            '&spades;Q', '&hearts;Q', '&diams;Q', '&clubs;Q', '&spades;K', '&hearts;K', '&diams;K', '&clubs;K', '&spades;A', '&hearts;A', '&diams;A', '&clubs;A'];
+            nums = nums.map((num) => {
+                return cards[Math.floor(num * 52)];
+            });
+            return nums;
         },
         /**
          * Takes a hex string and converts it into a base10 string with exactly 3 digits
