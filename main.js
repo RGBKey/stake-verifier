@@ -123,7 +123,7 @@ const app = new Vue({
             {name: 'Diamond Poker'},
             {name: 'Roulette'},
             {name: 'Keno'},
-            {name: 'Baccarat', disabled: true},
+            {name: 'Baccarat'},
             {name: 'Dice'}
         ],
         numMines: 1,
